@@ -86,8 +86,18 @@ def setup_base_data(conn):
     """Create brands, channels, payment types"""
     print("Setting up base data...")
     cursor = conn.cursor()
-    
-    # Sub-brands
+
+    try:
+        cursor.execute(
+            "INSERT INTO brands (id, name) VALUES (%s, %s) ON CONFLICT (id) DO NOTHING",
+            (BRAND_ID, 'Nola Challenge Brand')
+        )
+        print(f"✓ Ensured parent brand (ID: {BRAND_ID}) exists.")
+    except Exception as e:
+        print(f"Error inserting parent brand: {e}")
+        conn.rollback()
+        raise
+  
     sub_brands = ['Challenge Burger', 'Challenge Pizza', 'Challenge Sushi']
     sub_brand_ids = []
     for sb in sub_brands:

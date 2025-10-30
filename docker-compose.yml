@@ -1,9 +1,10 @@
 version: '3.8'
 
 services:
+  # --- 1. STACK DE DADOS (Base do Desafio) ---
   postgres:
     image: postgres:15
-    container_name: godlevel-db
+    container_name: nola-db
     environment:
       POSTGRES_DB: challenge_db
       POSTGRES_USER: challenge
@@ -12,7 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./scripts/database-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U challenge -d challenge_db"]
       interval: 5s
@@ -21,9 +22,8 @@ services:
 
   data-generator:
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: godlevel-data-gen
+      context: ./scripts
+    container_name: nola-data-gen
     depends_on:
       postgres:
         condition: service_healthy
@@ -31,21 +31,19 @@ services:
       DATABASE_URL: postgresql://challenge:challenge_2024@postgres:5432/challenge_db
     command: >
       sh -c "
-        echo 'Waiting for database to be ready...' &&
-        sleep 5 &&
+        echo 'Waiting for database...' && sleep 5 &&
         echo 'Generating challenge data...' &&
         python generate_data.py --db-url postgresql://challenge:challenge_2024@postgres:5432/challenge_db
       "
     profiles:
-      - tools
+      - tools # Só roda se chamado explicitamente: docker compose run --rm data-generator
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: godlevel-pgadmin
+    container_name: nola-pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@godlevel.com
       PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "5050:80"
     depends_on:
@@ -53,7 +51,75 @@ services:
     profiles:
       - tools
 
+  # --- 2. SUA STACK DE APLICAÇÃO ---
+  elasticsearch:
+    image: elasticsearch:8.10.4 # Use uma versão específica
+    container_name: nola-elastic
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # Limita memória para dev
+      - xpack.security.enabled=false # Desabilita segurança para dev
+    ports:
+      - "9200:9200"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: kibana:8.10.4
+    container_name: nola-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    profiles:
+      - tools # Opcional, mas útil para debug
+
+  backend-api:
+    build:
+      context: ./backend
+    container_name: nola-backend-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app # Hot reload
+    environment:
+      DATABASE_URL: "postgresql://challenge:challenge_2024@postgres:5432/challenge_db"
+      ELASTIC_URL: "http://elasticsearch:9200"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_started
+
+  ai-service:
+    build:
+      context: ./services/ai_service
+    container_name: nola-ai-service
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./services/ai_service/app:/app # Hot reload
+    env_file:
+      - .env # Puxa a GEMINI_API_KEY
+    depends_on:
+      - backend-api
+
+  frontend-react:
+    build:
+      context: ./frontend
+    container_name: nola-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src # Hot reload
+      - ./frontend/public:/app/public
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Necessário para hot-reload em Docker
+    depends_on:
+      - backend-api
+
 volumes:
   postgres_data:
-    driver: local
-
+  elastic_data:
