@@ -83,7 +83,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/app:/app # Hot reload
+      - ./backend:/app
     environment:
       DATABASE_URL: "postgresql://challenge:challenge_2024@postgres:5432/challenge_db"
       ELASTIC_URL: "http://elasticsearch:9200"
