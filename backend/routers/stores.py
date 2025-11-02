@@ -6,7 +6,7 @@ from database import get_db
 
 import models.stores as models # Importa o modelo SQLAlchemy
 import schemas.store as schemas # Importa o schema Pydantic
-import services.analytics as analytics_service
+import services.store_service as store_service
 
 # Cria um "roteador". O main.py vai importar isso.
 router = APIRouter(
@@ -26,7 +26,7 @@ def get_store_ranking(
     Retorna o ranking de lojas por performance (faturamento, vendas,
     ticket médio), com filtros.
     """
-    analytics_data = analytics_service.get_store_analytics(
+    analytics_data = store_service.get_store_analytics(
         db=db,
         start_date=start_date,
         end_date=end_date,

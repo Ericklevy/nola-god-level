@@ -119,6 +119,22 @@ services:
       - CHOKIDAR_USEPOLLING=true # Necessário para hot-reload em Docker
     depends_on:
       - backend-api
+  
+  # --- 3. SERVIÇO DE TESTE (NOVO) ---
+  test-runner:
+    build:
+      context: ./tests
+    container_name: nola-test-runner
+    depends_on:
+      backend-api:
+        condition: service_started # Espera a API iniciar
+    environment:
+      # Passa a URL interna da API para os scripts de teste
+      - API_URL=http://backend-api:8000
+    command: pytest -v --disable-warnings
+    profiles:
+      - testing # Só roda quando você pedir
+
 
 volumes:
   postgres_data:

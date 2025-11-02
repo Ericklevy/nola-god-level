@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import text
+
 from database import SessionLocal, engine, get_db # Importa direto do database.py
 from routers import stores, metrics, products , time_analysis , channels , customers
 # Importa os módulos que criamos
@@ -24,7 +26,7 @@ app.include_router(customers.router, prefix="/api")
 @app.get("/api/health")
 def health_check(db: Session = Depends(get_db)):
     try:
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         return {"status": "ok", "database": "connected"}
     except Exception as e:
         raise HTTPException(status_code=503, detail={

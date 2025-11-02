@@ -5,7 +5,7 @@ from typing import List, Optional , Literal
 from database import get_db
 
 import schemas.time_analysis as schemas
-import services.analytics as analytics_service
+import services.time_service as time_service
 
 
 router = APIRouter(
@@ -27,7 +27,7 @@ def get_time_analysis_heatmap(
     - hour_of_day: 0-23
     - value: Faturamento total no período
     """
-    heatmap_data = analytics_service.get_sales_heatmap(
+    heatmap_data = time_service.get_sales_heatmap(
         db=db,
         start_date=start_date,
         end_date=end_date,
@@ -50,7 +50,7 @@ def get_sales_timeline_data(
     Retorna dados de série temporal (timestamp, valor) para o faturamento,
     agrupado por 'day', 'week', ou 'month'.
     """
-    timeline_data = analytics_service.get_sales_timeline(
+    timeline_data = time_service.get_sales_timeline(
         db=db,
         start_date=start_date,
         end_date=end_date,

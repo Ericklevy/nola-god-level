@@ -4,7 +4,7 @@ from datetime import date
 from typing import List, Optional
 
 import schemas.channel as schemas
-import services.analytics as analytics_service
+import services.channel_service as channel_service
 from database import get_db
 
 router = APIRouter(
@@ -24,7 +24,7 @@ def get_channel_analytics(
     Retorna a análise de métricas (vendas, faturamento, ticket médio)
     agrupada por canal.
     """
-    analytics_data = analytics_service.get_channel_analytics(
+    analytics_data = channel_service.get_channel_analytics(
         db=db,
         start_date=start_date,
         end_date=end_date,

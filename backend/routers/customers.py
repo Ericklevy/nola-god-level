@@ -5,7 +5,7 @@ from typing import List, Optional
 
 
 import schemas.customer as schemas
-import services.analytics as analytics_service
+import services.customer_service as customer_service
 from database import get_db
 
 router = APIRouter(
@@ -23,7 +23,7 @@ def get_top_customers_ranking(
     """
     Retorna o ranking de top clientes por valor total gasto.
     """
-    top_customers = analytics_service.get_top_customers(
+    top_customers = customer_service.get_top_customers(
         db=db,
         start_date=start_date,
         end_date=end_date,
@@ -46,7 +46,7 @@ def get_customer_segments(
     - **at_risk**: Clientes com 3+ pedidos que não compram há > 30 dias.
     """
 
-    customers = analytics_service.get_customer_segment(
+    customers = customer_service.get_customer_segment(
         db=db,
         segment_type=segment,
         start_date=start_date,

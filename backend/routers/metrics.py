@@ -4,7 +4,7 @@ from datetime import date
 from typing import List, Optional
 
 import schemas.metrics as schemas # Importa o schema de resposta
-import services.analytics as analytics_service # Importa a lógica de negócio
+import services.metrics_service as metrics_service # Importa a lógica de negócio
 from database import get_db
 
 router = APIRouter(
@@ -25,7 +25,7 @@ def get_overview(
     Calcula os KPIs de visão geral (overview) para o dashboard principal
     com base nos filtros de data, lojas e canais.
     """
-    metrics = analytics_service.get_overview_metrics(
+    metrics = metrics_service.get_overview_metrics(
         db=db,
         start_date=start_date,
         end_date=end_date,

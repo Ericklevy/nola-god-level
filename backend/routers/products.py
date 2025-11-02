@@ -4,7 +4,7 @@ from datetime import date
 from typing import List, Optional
 
 import schemas.product as schemas
-import services.analytics as analytics_service
+import services.product_service as product_service
 from database import get_db
 
 router = APIRouter(
@@ -25,7 +25,7 @@ def get_products_ranking(
     Retorna o ranking de produtos mais vendidos (Top N) por faturamento,
     com filtros de data, lojas e canais.
     """
-    ranking = analytics_service.get_products_ranking(
+    ranking = product_service.get_products_ranking(
         db=db,
         start_date=start_date,
         end_date=end_date,
@@ -48,7 +48,7 @@ def get_top_customizations(
     Retorna o ranking dos itens/complementos (customizações) mais
     vendidos, com filtros.
     """
-    top_items = analytics_service.get_top_customizations(
+    top_items = product_service.get_top_customizations(
         db=db,
         start_date=start_date,
         end_date=end_date,
