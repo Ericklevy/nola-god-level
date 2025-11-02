@@ -1,37 +1,45 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import text
+# metrics_service.py (Corrigido)
+
 from datetime import date
 from typing import List, Optional
+from repositories.metrics_repository import MetricsRepository
+from schemas.metrics import MetricsOverview
+from sqlalchemy.orm import Session # Session não é mais usada no __init__
 
-def get_overview_metrics(
-    db: Session, 
-    start_date: date, 
-    end_date: date, 
-    store_ids: Optional[List[int]] = None, 
-    channel_ids: Optional[List[int]] = None
-):
-    query = text("""
-        SELECT
-            COUNT(*) as total_sales,
-            COALESCE(SUM(total_amount), 0.00) as revenue,
-            COALESCE(AVG(total_amount), 0.00) as avg_ticket,
-            COALESCE(
-                SUM(CASE WHEN sale_status_desc = 'COMPLETED' THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0), 0
-            ) * 100 as conversion_rate
-        FROM sales
-        WHERE
-            created_at BETWEEN :start_date AND :end_date
-            AND sale_status_desc IN ('COMPLETED', 'CANCELLED')
-            AND (:store_ids IS NULL OR store_id = ANY(:store_ids))
-            AND (:channel_ids IS NULL OR channel_id = ANY(:channel_ids))
-    """)
+class MetricsService:
+    # MUDANÇA 1: O __init__ agora recebe o Repositório, não a Session
+    def __init__(self, repository: MetricsRepository):
+        """
+        Inicializa o serviço com o repositório já injetado.
+        """
+        # MUDANÇA 2: Apenas atribui o repositório
+        self.repository = repository
     
-    params = {
-        "start_date": start_date,
-        "end_date": end_date,
-        "store_ids": store_ids,
-        "channel_ids": channel_ids
-    }
-    
-    result = db.execute(query, params).first()
-    return result
+    def get_overview_metrics(
+        self, 
+        start_date: date, 
+        end_date: date, 
+        store_ids: Optional[List[int]] = None, 
+        channel_ids: Optional[List[int]] = None
+    ) -> MetricsOverview:
+        
+        # 1. Lógica de Negócio (ex: validar datas)
+        if start_date > end_date:
+            raise ValueError("Data inicial não pode ser maior que a data final")
+            
+        # 2. Chama o repositório (que faz o SQL)
+        metrics_data = self.repository.get_overview(
+            start_date=start_date,
+            end_date=end_date,
+            store_ids=store_ids,
+            channel_ids=channel_ids
+        )
+        
+        # 3. Converte o resultado do banco (Row) para o schema Pydantic (DTO)
+        # BÔNUS: Use .model_validate() que é o padrão do Pydantic V2+
+        # (substituto do .from_attributes() / orm_mode)
+        if metrics_data:
+            return MetricsOverview.model_validate(metrics_data)
+        
+        # Retorna um schema vazio se a query não retornar nada
+        return MetricsOverview(total_sales=0, revenue=0, avg_ticket=0, conversion_rate=0)

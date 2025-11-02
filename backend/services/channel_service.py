@@ -1,39 +1,33 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+# channel_service.py (Corrigido)
+
 from datetime import date
 from typing import List, Optional
+from repositories.channel_repository import ChannelRepository
+import schemas.channel as schemas
+from sqlalchemy.orm import Session # Não é mais usado no __init__
 
-from models.sales import Sale
-from models.channels import Channel
+class ChannelService:
+    # MUDANÇA 1: Recebe o Repositório, não a sessão
+    def __init__(self, repository: ChannelRepository):
+        """
+        Inicializa o serviço com o repositório já injetado.
+        """
+        # MUDANÇA 2: Apenas atribui o repositório
+        self.repository = repository
 
-def get_channel_analytics(
-    db: Session, 
-    start_date: date, 
-    end_date: date, 
-    store_ids: Optional[List[int]] = None, 
-    channel_ids: Optional[List[int]] = None
-):
-    query = (
-        db.query(
-            Channel.id.label("channel_id"),
-            Channel.name.label("channel_name"),
-            func.count(Sale.id).label("total_sales"),
-            func.coalesce(func.sum(Sale.total_amount), 0.00).label("revenue"),
-            func.coalesce(func.avg(Sale.total_amount), 0.00).label("avg_ticket")
+    def get_channel_analytics(
+        self, 
+        start_date: date, 
+        end_date: date, 
+        store_ids: Optional[List[int]], 
+        channel_ids: Optional[List[int]]
+    ) -> List[schemas.ChannelAnalytics]:
+        
+        # 1. O Serviço chama o Repositório (que faz o SQL)
+        analytics_data = self.repository.get_analytics(
+            start_date, end_date, store_ids, channel_ids
         )
-        .join(Sale, Channel.id == Sale.channel_id)
-        .filter(
-            Sale.created_at.between(start_date, end_date),
-            Sale.sale_status_desc == 'COMPLETED'
-        )
-    )
-    if store_ids:
-        query = query.filter(Sale.store_id.in_(store_ids))
-    if channel_ids:
-        query = query.filter(Channel.id.in_(channel_ids))
-    results = (
-        query.group_by(Channel.id, Channel.name)
-        .order_by(desc("revenue"))
-        .all()
-    )
-    return results
+        
+        # 2. O Serviço converte os dados para o schema da API
+        # BÔNUS: .model_validate() é o substituto moderno do .from_attributes()
+        return [schemas.ChannelAnalytics.model_validate(item) for item in analytics_data]

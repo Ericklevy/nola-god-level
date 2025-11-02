@@ -32,3 +32,6 @@ class CustomerSegment(BaseModel):
     segment_name: str
     customer_count: int
     customers: List[CustomerSegmentData] # Lista de clientes no segmento
+
+    class Config:
+        from_attributes = True # Garanta que está assim

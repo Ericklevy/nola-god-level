@@ -1,17 +1,27 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from datetime import date
-from typing import List, Optional , Literal
-from database import get_db
+from typing import List, Optional, Literal
 
 import schemas.time_analysis as schemas
-import services.time_service as time_service
-
+from services.time_service import TimeService # MUDANÇA: Importa a CLASSE
+from repositories.time_repository import TimeRepository # NOVO
+from database import get_db
 
 router = APIRouter(
     prefix="/time-analysis",
     tags=["Time Analysis"]
 )
+
+# --- Dependência (Injeção de Dependência) ---
+def get_time_service(db: Session = Depends(get_db)):
+    """
+    Cria e injeta o serviço de análise temporal.
+    """
+    repo = TimeRepository(db)
+    return TimeService(repo)
+
+# --- Endpoints ---
 
 @router.get("/heatmap", response_model=List[schemas.HeatmapDataPoint])
 def get_time_analysis_heatmap(
@@ -19,7 +29,8 @@ def get_time_analysis_heatmap(
     end_date: date,
     store_ids: Optional[List[int]] = Query(None), 
     channel_ids: Optional[List[int]] = Query(None),
-    db: Session = Depends(get_db)
+    # MUDANÇA: O serviço é injetado aqui
+    service: TimeService = Depends(get_time_service)
 ):
     """
     Retorna os dados para o heatmap de vendas (Dia da Semana x Hora).
@@ -27,35 +38,33 @@ def get_time_analysis_heatmap(
     - hour_of_day: 0-23
     - value: Faturamento total no período
     """
-    heatmap_data = time_service.get_sales_heatmap(
-        db=db,
+    # MUDANÇA: O router chama o serviço
+    return service.get_sales_heatmap(
         start_date=start_date,
         end_date=end_date,
         store_ids=store_ids,
         channel_ids=channel_ids
     )
-    return heatmap_data
 
 @router.get("/timeline", response_model=List[schemas.TimelineDataPoint])
 def get_sales_timeline_data(
     start_date: date,
     end_date: date,
-    # 'Literal' força a API a aceitar apenas esses valores
     group_by: Literal["day", "week", "month"] = "day",
     store_ids: Optional[List[int]] = Query(None), 
     channel_ids: Optional[List[int]] = Query(None),
-    db: Session = Depends(get_db)
+    # MUDANÇA: O serviço é injetado aqui
+    service: TimeService = Depends(get_time_service)
 ):
     """
     Retorna dados de série temporal (timestamp, valor) para o faturamento,
     agrupado por 'day', 'week', ou 'month'.
     """
-    timeline_data = time_service.get_sales_timeline(
-        db=db,
+    # MUDANÇA: O router chama o serviço
+    return service.get_sales_timeline(
         start_date=start_date,
         end_date=end_date,
         group_by=group_by,
         store_ids=store_ids,
         channel_ids=channel_ids
     )
-    return timeline_data

@@ -10,7 +10,7 @@ START_DATE = "2025-05-01"
 END_DATE = "2025-10-31"
 
 # Lista de todos os endpoints que queremos medir
-ENDPOINTS_TO_PROFILE = [
+ENDPOINTS_TO_PROFILE = [ 
     {
         "name": "Health Check",
         "url": "/api/health",

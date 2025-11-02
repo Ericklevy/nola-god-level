@@ -1,82 +1,52 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+# product_service.py (Corrigido)
+
 from datetime import date
 from typing import List, Optional
+from repositories.product_repository import ProductRepository
+import schemas.product as schemas
+from sqlalchemy.orm import Session # Não é mais usado no __init__
 
-from models.products import Product
-from models.product_sales import ProductSale
-from models.sales import Sale
-from models.categories import Category
-from models.items import Item
-from models.item_product_sales import ItemProductSale
+class ProductService:
+    # MUDANÇA 1: Recebe o repositório, não a sessão 'db'
+    def __init__(self, repository: ProductRepository):
+        """
+        Inicializa o serviço com o repositório já injetado.
+        """
+        # MUDANÇA 2: Apenas atribui o repositório recebido
+        self.repository = repository
 
-def get_products_ranking(
-    db: Session, 
-    start_date: date, 
-    end_date: date, 
-    limit: int = 10,
-    store_ids: Optional[List[int]] = None, 
-    channel_ids: Optional[List[int]] = None
-):
-    query = (
-        db.query(
-            Product.id.label("product_id"),
-            Product.name.label("product_name"),
-            Category.name.label("category_name"),
-            func.sum(ProductSale.quantity).label("quantity_sold"),
-            func.sum(ProductSale.total_price).label("revenue")
+    def get_products_ranking(
+        self, 
+        start_date: date, 
+        end_date: date, 
+        limit: int,
+        store_ids: Optional[List[int]], 
+        channel_ids: Optional[List[int]]
+    ) -> List[schemas.ProductRankingItem]:
+        
+        # 1. Chama o repositório (que faz o SQL)
+        ranking_data = self.repository.get_ranking(
+            start_date, end_date, limit, store_ids, channel_ids
         )
-        .join(ProductSale, Product.id == ProductSale.product_id)
-        .join(Sale, ProductSale.sale_id == Sale.id)
-        .outerjoin(Category, Product.category_id == Category.id)
-        .filter(
-            Sale.created_at.between(start_date, end_date),
-            Sale.sale_status_desc == 'COMPLETED'
-        )
-    )
-    if store_ids:
-        query = query.filter(Sale.store_id.in_(store_ids))
-    if channel_ids:
-        query = query.filter(Sale.channel_id.in_(channel_ids))
-    results = (
-        query.group_by(Product.id, Product.name, Category.name)
-        .order_by(desc("revenue"))
-        .limit(limit)
-        .all()
-    )
-    return results
+        
+        # 2. Converte cada item da lista para o schema Pydantic
+        # BÔNUS: .model_validate() é o substituto moderno do .from_attributes()
+        return [schemas.ProductRankingItem.model_validate(item) for item in ranking_data]
 
-def get_top_customizations(
-    db: Session, 
-    start_date: date, 
-    end_date: date, 
-    limit: int = 10,
-    store_ids: Optional[List[int]] = None, 
-    channel_ids: Optional[List[int]] = None
-):
-    query = (
-        db.query(
-            Item.id.label("item_id"),
-            Item.name.label("item_name"),
-            func.count(ItemProductSale.id).label("times_added"),
-            func.coalesce(func.sum(ItemProductSale.additional_price * ItemProductSale.quantity), 0.00).label("revenue_generated")
+    def get_top_customizations(
+        self, 
+        start_date: date, 
+        end_date: date, 
+        limit: int,
+        store_ids: Optional[List[int]], 
+        channel_ids: Optional[List[int]]
+    ) -> List[schemas.TopCustomizationItem]:
+        
+        # 1. Chama o repositório (que faz o SQL)
+        customizations_data = self.repository.get_top_customizations(
+            start_date, end_date, limit, store_ids, channel_ids
         )
-        .join(ItemProductSale, Item.id == ItemProductSale.item_id)
-        .join(ProductSale, ItemProductSale.product_sale_id == ProductSale.id)
-        .join(Sale, ProductSale.sale_id == Sale.id)
-        .filter(
-            Sale.created_at.between(start_date, end_date),
-            Sale.sale_status_desc == 'COMPLETED'
-        )
-    )
-    if store_ids:
-        query = query.filter(Sale.store_id.in_(store_ids))
-    if channel_ids:
-        query = query.filter(Sale.channel_id.in_(channel_ids))
-    results = (
-        query.group_by(Item.id, Item.name)
-        .order_by(desc("times_added"))
-        .limit(limit)
-        .all()
-    )
-    return results
+        
+        # 2. Converte os resultados para o schema Pydantic
+        # BÔNUS: .model_validate() é o substituto moderno do .from_attributes()
+        return [schemas.TopCustomizationItem.model_validate(item) for item in customizations_data]

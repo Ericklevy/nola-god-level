@@ -1,72 +1,54 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import text
+# time_service.py (Corrigido)
+
 from datetime import date
 from typing import List, Optional
+from repositories.time_repository import TimeRepository
+import schemas.time_analysis as schemas
+from sqlalchemy.orm import Session # Não é mais necessário para o __init__
 
-def get_sales_heatmap(
-    db: Session, 
-    start_date: date, 
-    end_date: date, 
-    store_ids: Optional[List[int]] = None, 
-    channel_ids: Optional[List[int]] = None
-):
-    query = text("""
-        SELECT
-            EXTRACT(DOW FROM created_at) as day_of_week,
-            EXTRACT(HOUR FROM created_at) as hour_of_day,
-            COALESCE(SUM(total_amount), 0.00) as value
-        FROM sales
-        WHERE
-            created_at BETWEEN :start_date AND :end_date
-            AND sale_status_desc = 'COMPLETED'
-            AND (:store_ids IS NULL OR store_id = ANY(:store_ids))
-            AND (:channel_ids IS NULL OR channel_id = ANY(:channel_ids))
-        GROUP BY
-            day_of_week, hour_of_day
-        ORDER BY
-            day_of_week, hour_of_day
-    """)
-    params = {
-        "start_date": start_date,
-        "end_date": end_date,
-        "store_ids": store_ids,
-        "channel_ids": channel_ids
-    }
-    results = db.execute(query, params).all()
-    return results
+class TimeService:
+    # MUDANÇA 1: Corrigir a Injeção de Dependência
+    def __init__(self, repository: TimeRepository):
+        """
+        Inicializa o serviço com o repositório já injetado.
+        """
+        # Apenas atribui o repositório que veio do router
+        self.repository = repository
 
-def get_sales_timeline(
-    db: Session, 
-    start_date: date, 
-    end_date: date,
-    group_by: str = "day",
-    store_ids: Optional[List[int]] = None, 
-    channel_ids: Optional[List[int]] = None
-):
-    if group_by not in ["day", "week", "month"]:
-        group_by = "day"
+    def get_sales_heatmap(
+        self, 
+        start_date: date, 
+        end_date: date, 
+        store_ids: Optional[List[int]], 
+        channel_ids: Optional[List[int]]
+    ) -> List[schemas.HeatmapDataPoint]:
         
-    query = text(f"""
-        SELECT
-            DATE_TRUNC(:group_by, created_at)::date as timestamp,
-            COALESCE(SUM(total_amount), 0.00) as value
-        FROM sales
-        WHERE
-            created_at BETWEEN :start_date AND :end_date
-            AND sale_status_desc = 'COMPLETED'
-            AND (:store_ids IS NULL OR store_id = ANY(:store_ids))
-            AND (:channel_ids IS NULL OR channel_id = ANY(:channel_ids))
-        GROUP BY
-            timestamp
-        ORDER BY
-            timestamp ASC
-    """)
-    params = {
-        "group_by": group_by,
-        "start_date": start_date,
-        "end_date": end_date,
-        "store_ids": store_ids,
-        "channel_ids": channel_ids
-    }
-    results = db.execute(query, params).all()
-    return results
+        # MUDANÇA 2: Corrigir o nome do método
+        # O Serviço chama o Repositório (que faz o SQL)
+        heatmap_data = self.repository.get_sales_heatmap( # <--- 'get_heatmap' virou 'get_sales_heatmap'
+            start_date, end_date, store_ids, channel_ids
+        )
+        
+        # BÔNUS: Usando .model_validate() que é o padrão do Pydantic V2+
+        return [schemas.HeatmapDataPoint.model_validate(item) for item in heatmap_data]
+
+    def get_sales_timeline(
+        self, 
+        start_date: date, 
+        end_date: date,
+        group_by: str,
+        store_ids: Optional[List[int]], 
+        channel_ids: Optional[List[int]]
+    ) -> List[schemas.TimelineDataPoint]:
+        
+        # A lógica de validação está correta aqui
+        if group_by not in ["day", "week", "month"]:
+            group_by = "day"
+            
+        # MUDANÇA 3: Corrigir o nome do método
+        timeline_data = self.repository.get_sales_timeline( # <--- 'get_timeline' virou 'get_sales_timeline'
+            start_date, end_date, group_by, store_ids, channel_ids
+        )
+        
+        # BÔNUS: Usando .model_validate()
+        return [schemas.TimelineDataPoint.model_validate(item) for item in timeline_data]
