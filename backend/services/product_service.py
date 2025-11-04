@@ -15,14 +15,14 @@ class ProductService:
         start_date: date, 
         end_date: date, 
         limit: int,
-        skip: int, # <--- 1. ADICIONADO AQUI
+        skip: int, # <--- 1. CORREÇÃO AQUI
         store_ids: Optional[List[int]], 
         channel_ids: Optional[List[int]]
     ) -> List[schemas.ProductRankingItem]:
         
         # 1. Chama o repositório (que faz o SQL)
         ranking_data = self.repository.get_ranking(
-            start_date, end_date, limit, skip, store_ids, channel_ids # <--- 2. ADICIONADO AQUI
+            start_date, end_date, limit, skip, store_ids, channel_ids # <--- 2. CORREÇÃO AQUI
         )
         
         return [schemas.ProductRankingItem.model_validate(item) for item in ranking_data]
