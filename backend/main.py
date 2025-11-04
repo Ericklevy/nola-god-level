@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-
+from fastapi.middleware.cors import CORSMiddleware
 from database import SessionLocal, engine, get_db # Importa direto do database.py
 from routers import stores, metrics, products , time_analysis , channels , customers
 # Importa os módulos que criamos
@@ -12,6 +12,21 @@ import schemas
 app = FastAPI(
     title="Nola - Analytics para Restaurantes",
     description="API para o desafio God Level Coder"
+)
+
+origins = [
+    "http://localhost:3000", # Endereço do frontend React (se rodar na porta 3000)
+    "http://localhost:5173", # Endereço do frontend React (se rodar na porta 5173)
+    # Adicione aqui a URL do seu frontend quando ele estiver no ar (ex: no Vercel)
+    # "https://meu-frontend-legal.vercel.app" 
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,       # Permite as origens da lista
+    allow_credentials=True,      # Permite cookies (se usar)
+    allow_methods=["*"],         # Permite todos os métodos (GET, POST, etc)
+    allow_headers=["*"],         # Permite todos os cabeçalhos
 )
 
 # --- Inclui os Roteadores ---
