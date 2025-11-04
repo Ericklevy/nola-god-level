@@ -17,6 +17,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3000", # Endereço do frontend React (se rodar na porta 3000)
     "http://localhost:5173", # Endereço do frontend React (se rodar na porta 5173)
+    "https://nola-god-level.onrender.com", # Endereço do backend no Render
     # Adicione aqui a URL do seu frontend quando ele estiver no ar (ex: no Vercel)
     # "https://meu-frontend-legal.vercel.app" 
 ]
