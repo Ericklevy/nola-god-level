@@ -1,44 +1,28 @@
-# product_service.py (Corrigido)
+# store_service.py (Corrigido)
 
 from datetime import date
 from typing import List, Optional
-from repositories.product_repository import ProductRepository
-import schemas.product as schemas
-from sqlalchemy.orm import Session # Não é mais usado no __init__
+from repositories.store_repository import StoreRepository
+import schemas.store as schemas
+from sqlalchemy.orm import Session 
 
-class ProductService:
-    # MUDANÇA 1: Recebe o repositório, não a sessão 'db'
-    def __init__(self, repository: ProductRepository):
+class StoreService:
+    def __init__(self, repository: StoreRepository):
+        """
+        Inicializa o serviço com o repositório já criado.
+        """
         self.repository = repository
 
-    def get_products_ranking(
+    def get_store_analytics(
         self, 
         start_date: date, 
         end_date: date, 
-        limit: int,
-        skip: int, # <--- NOVO PARÂMETRO
         store_ids: Optional[List[int]], 
         channel_ids: Optional[List[int]]
-    ) -> List[schemas.ProductRankingItem]:
+    ) -> List[schemas.StoreAnalytics]:
         
-        # 1. Chama o repositório (que faz o SQL)
-        ranking_data = self.repository.get_ranking(
-            start_date, end_date, limit, skip, store_ids, channel_ids # <--- skip ADICIONADO AQUI
+        analytics_data = self.repository.get_analytics(
+            start_date, end_date, store_ids, channel_ids
         )
         
-        return [schemas.ProductRankingItem.model_validate(item) for item in ranking_data]
-
-    def get_top_customizations(
-        self, 
-        start_date: date, 
-        end_date: date, 
-        limit: int,
-        store_ids: Optional[List[int]], 
-        channel_ids: Optional[List[int]]
-    ) -> List[schemas.TopCustomizationItem]:
-        
-        customizations_data = self.repository.get_top_customizations(
-            start_date, end_date, limit, store_ids, channel_ids
-        )
-        
-        return [schemas.TopCustomizationItem.model_validate(item) for item in customizations_data]
+        return [schemas.StoreAnalytics.model_validate(item) for item in analytics_data]
