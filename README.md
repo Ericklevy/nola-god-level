@@ -105,7 +105,7 @@ Para garantir a disponibilidade e performance, a aplicação foi distribuída em
 ### Demonstração e Documentação da API
 
 -   **🎥 Vídeo Demo (YouTube):** Uma demonstração completa da solução, explicando a arquitetura e mostrando a plataforma em funcionamento, está disponível no YouTube.
-    -   **[Assista ao vídeo aqui](https://www.youtube.com/https://youtu.be/M9Bcrp-moPo)**
+    -   **[Assista ao vídeo aqui](https://youtu.be/M9Bcrp-moPo)**
 
 -   **📖 Documentação da API (Postman):** A documentação detalhada de todos os endpoints da API, incluindo exemplos de requisições e respostas, foi criada no Postman e pode ser acessada através do link abaixo.
     -   **[Acessar a documentação no Postman](https://documenter.getpostman.com/view/17743876/2sB3WpShAH)**
