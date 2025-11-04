@@ -1,37 +1,44 @@
-# store_service.py (Corrigido)
+# product_service.py (Corrigido)
 
 from datetime import date
 from typing import List, Optional
-from repositories.store_repository import StoreRepository
-import schemas.store as schemas
-# A Session não é mais necessária aqui no init
-# from sqlalchemy.orm import Session 
+from repositories.product_repository import ProductRepository
+import schemas.product as schemas
+from sqlalchemy.orm import Session # Não é mais usado no __init__
 
-class StoreService:
-    def __init__(self, repository: StoreRepository): # MUDANÇA 1: Receba o repositório
-        """
-        Inicializa o serviço com o repositório já criado.
-        """
-        self.repository = repository # MUDANÇA 2: Apenas atribua o repositório
-                                     # Não crie um novo aqui.
+class ProductService:
+    # MUDANÇA 1: Recebe o repositório, não a sessão 'db'
+    def __init__(self, repository: ProductRepository):
+        self.repository = repository
 
-    def get_store_analytics(
+    def get_products_ranking(
         self, 
         start_date: date, 
         end_date: date, 
+        limit: int,
+        skip: int, # <--- NOVO PARÂMETRO
         store_ids: Optional[List[int]], 
         channel_ids: Optional[List[int]]
-    ) -> List[schemas.StoreAnalytics]:
+    ) -> List[schemas.ProductRankingItem]:
         
-        # 1. O Serviço chama o Repositório (que faz o SQL)
-        analytics_data = self.repository.get_analytics(
-            start_date, end_date, store_ids, channel_ids
+        # 1. Chama o repositório (que faz o SQL)
+        ranking_data = self.repository.get_ranking(
+            start_date, end_date, limit, skip, store_ids, channel_ids # <--- skip ADICIONADO AQUI
         )
         
-        # 2. O Serviço converte os dados para o schema da API
-        # NOTA: O seu schema precisa ter .from_attributes() ou .model_validate()
-        # Se .from_attributes() não existir, use .model_validate()
+        return [schemas.ProductRankingItem.model_validate(item) for item in ranking_data]
+
+    def get_top_customizations(
+        self, 
+        start_date: date, 
+        end_date: date, 
+        limit: int,
+        store_ids: Optional[List[int]], 
+        channel_ids: Optional[List[int]]
+    ) -> List[schemas.TopCustomizationItem]:
         
-        # Usando model_validate para garantir compatibilidade com Pydantic V2+
-        # e tratando os dados que vêm do SQLAlchemy (Row objects)
-        return [schemas.StoreAnalytics.model_validate(item) for item in analytics_data]
+        customizations_data = self.repository.get_top_customizations(
+            start_date, end_date, limit, store_ids, channel_ids
+        )
+        
+        return [schemas.TopCustomizationItem.model_validate(item) for item in customizations_data]
