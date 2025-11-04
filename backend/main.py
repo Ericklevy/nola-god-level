@@ -19,7 +19,7 @@ origins = [
     "http://localhost:5173", # Endereço do frontend React (se rodar na porta 5173)
     "https://nola-god-level.onrender.com", # Endereço do backend no Render
     # Adicione aqui a URL do seu frontend quando ele estiver no ar (ex: no Vercel)
-    # "https://meu-frontend-legal.vercel.app" 
+    "https://nola-god-level-alpha.vercel.app/", # Exemplo de frontend no Vercel
 ]
 
 app.add_middleware(
