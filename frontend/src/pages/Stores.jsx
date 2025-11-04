@@ -4,7 +4,7 @@ import './Products.css'; // <--- REUTILIZANDO O CSS da página de Produtos
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
-// --- Funções de Formatação ---
+// --- Funções de Formatação (copiadas do Dashboard) ---
 function formatCurrency(value) {
   const number = parseFloat(value);
   if (isNaN(number)) return "R$ 0,00";
@@ -31,7 +31,7 @@ function Stores() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // 1. Busca no endpoint correto
+        // 1. Busca no endpoint correto de Lojas
         const url = `${API_URL}/stores/ranking?start_date=${START_DATE}&end_date=${END_DATE}`;
         
         const response = await axios.get(url);
