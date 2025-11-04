@@ -108,9 +108,10 @@ Para garantir a disponibilidade e performance, a aplicação foi distribuída em
     -   **[Assista ao vídeo aqui](https://www.youtube.com/https://youtu.be/M9Bcrp-moPo)**
 
 -   **📖 Documentação da API (Postman):** A documentação detalhada de todos os endpoints da API, incluindo exemplos de requisições e respostas, foi criada no Postman e pode ser acessada através do link abaixo.
-    -   **[Acessar a documentação no Postman](https://documenter.getpostman.com/view/17743876/2sB3WpShAH)**
-    **📖 Documentação do Frontend (Storybook / Deploy):** A documentação visual dos componentes, padrões de UI e instruções de uso do frontend está disponível nos links abaixo.
-    - **[Ver o deploy do frontend (Vercel)](nola-god-level-alpha.vercel.app)**
+-   **[Acessar a documentação no Postman](https://documenter.getpostman.com/view/17743876/2sB3WpShAH)**
+-  **📖 Documentação do Frontend (Storybook / Deploy):** A documentação visual dos componentes, padrões de UI e instruções de uso do frontend está disponível nos links abaixo.
+ - **[Ver o deploy do frontend (Vercel)](nola-god-level-alpha.vercel.app)**
+
 
     
 
