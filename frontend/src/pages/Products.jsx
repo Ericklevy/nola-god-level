@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './Products.css'; // O CSS que já criamos e atualizamos
+import './Products.css'; // Importa o CSS que acabamos de criar
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
-// REMOVEMOS O PAGE_LIMIT
 
-// --- Funções de Formatação ---
+// --- Funções de Formatação (copiadas do Dashboard) ---
 function formatCurrency(value) {
   const number = parseFloat(value);
   if (isNaN(number)) return "R$ 0,00";
@@ -24,22 +23,21 @@ function Products() {
   const [customData, setCustomData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // REMOVEMOS O ESTADO 'page'
 
   // Ajuste estas datas para o intervalo real do seu banco!
   const START_DATE = '2025-06-01';
   const END_DATE = '2025-10-31';
 
   useEffect(() => {
-    // Voltamos a ter uma função única para buscar tudo
     const fetchAllData = async () => {
       try {
         setLoading(true);
         
-        // URL do ranking AGORA SEM skip/limit
-        const rankingUrl = `${API_URL}/products/ranking?start_date=${START_DATE}&end_date=${END_DATE}`;
+        // 1. Define as URLs dos endpoints
+        const rankingUrl = `${API_URL}/products/ranking?start_date=${START_DATE}&end_date=${END_DATE}&limit=50`;
         const customUrl = `${API_URL}/products/customizations?start_date=${START_DATE}&end_date=${END_DATE}&limit=10`;
 
+        // 2. Faz as duas requisições em paralelo
         const [rankingResponse, customResponse] = await Promise.all([
           axios.get(rankingUrl),
           axios.get(customUrl)
@@ -57,13 +55,13 @@ function Products() {
     };
 
     fetchAllData();
-  }, []); // REMOVEMOS 'page' da dependência
+  }, []);
 
   // --- Funções de Renderização ---
 
   const renderRankingTable = () => (
     <div className="data-section">
-      <h2 className="data-section-title">Ranking de Produtos (Todos)</h2>
+      <h2 className="data-section-title">Ranking de Produtos (Top 50)</h2>
       <div className="table-container">
         <table className="data-table">
           <thead>
@@ -79,7 +77,7 @@ function Products() {
           <tbody>
             {rankingData.map((product, index) => (
               <tr key={product.product_id}>
-                <td>{index + 1}</td> {/* O Rank agora é simples */}
+                <td>{index + 1}</td>
                 <td>{product.product_name}</td>
                 <td>{product.category_name || '-'}</td>
                 <td className="align-right">{formatNumber(product.quantity_sold)}</td>
@@ -90,7 +88,6 @@ function Products() {
           </tbody>
         </table>
       </div>
-      {/* REMOVEMOS OS CONTROLES DE PAGINAÇÃO DAQUI */}
     </div>
   );
 
@@ -120,9 +117,12 @@ function Products() {
     <>
       <h1 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#F9FAFB', textAlign: 'left' }}>Análise de Produtos</h1>
       <div className="page-grid">
+        {/* Coluna Principal (Tabela) */}
         <div className="main-column">
           {renderRankingTable()}
         </div>
+        
+        {/* Coluna Lateral (Lista) */}
         <div className="sidebar-column">
           {renderCustomizationsList()}
         </div>

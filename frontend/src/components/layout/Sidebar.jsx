@@ -15,7 +15,7 @@ const navItems = [
 function Sidebar() {
   return (
     <nav className="sidebar">
-      <h2 className="sidebar-title">Nola Analytics</h2>
+      <h2 className="sidebar-title">Food Commerce</h2>
       <ul className="sidebar-menu">
         {navItems.map((item) => (
           <li key={item.name}>

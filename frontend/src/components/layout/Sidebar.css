@@ -7,14 +7,7 @@
   flex-direction: column;
 }
 
-.sidebar-title {
-  color: #F9FAFB;
-  font-size: 1.25rem;
-  font-weight: 600;
-  padding: 1.5rem 1.25rem;
-  text-align: center;
-  border-bottom: 1px solid #374151;
-}
+
 
 .sidebar-menu {
   list-style: none;

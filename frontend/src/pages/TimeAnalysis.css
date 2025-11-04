@@ -1,26 +1,28 @@
+.heatmap-container-wrapper {
+  overflow-x: auto; /* Permite scroll horizontal em telas pequenas */
+  padding-bottom: 1rem;
+}
+
 .heatmap-container {
   display: grid;
-  /* Define o layout: 1 linha para labels-y, 1 linha para o grid */
-  /* 1 coluna para labels-x, 1 coluna para o grid */
   grid-template-areas:
     ". labels-x"
     "labels-y grid";
   grid-template-columns: auto 1fr;
   grid-template-rows: auto 1fr;
   gap: 4px;
+  min-width: 800px;
 }
 
 .heatmap-labels-x {
   grid-area: labels-x;
   display: grid;
-  /* 24 colunas para as 24 horas */
   grid-template-columns: repeat(24, 1fr);
 }
 
 .heatmap-labels-y {
   grid-area: labels-y;
   display: grid;
-  /* 7 linhas para os 7 dias */
   grid-template-rows: repeat(7, 1fr);
   text-align: right;
   padding-right: 1rem;
@@ -40,7 +42,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  height: 40px; /* Altura da célula */
+  height: 35px; /* Altura da célula */
 }
 
 .heatmap-grid {
@@ -57,17 +59,42 @@
 
 .heatmap-cell {
   width: 100%;
-  height: 40px;
-  background-color: #374151; /* Cor base (--gray-700) */
+  height: 35px;
   border-radius: 2px;
   transition: background-color 0.2s;
-  
-  /* Usamos a cor primária (azul) e variamos a opacidade
-    baseado no valor que vem do componente
+  /* CORREÇÃO: Removemos a cor de fundo daqui.
+    Ela agora será definida pelo React (style prop)
+    com base na lógica Vermelho-Azul-Verde.
   */
-  background-color: rgba(59, 130, 246, var(--intensity, 0));
 }
 
 .heatmap-cell:hover {
   border: 1px solid #F9FAFB; /* Destaque no hover */
+}
+
+/* --- NOVOS ESTILOS PARA A LEGENDA --- */
+.heatmap-legend {
+  display: flex;
+  justify-content: flex-end; /* Alinha à direita */
+  align-items: center;
+  gap: 1.5rem; /* Espaço entre os itens */
+  padding: 1rem 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Espaço entre o quadrado e o texto */
+}
+
+.legend-square {
+  width: 15px;
+  height: 15px;
+  border-radius: 2px;
+  border: 1px solid #9CA3AF;
+}
+
+.legend-item span {
+  font-size: 0.875rem;
+  color: #D1D5DB; /* --gray-300 */
 }
