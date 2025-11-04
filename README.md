@@ -112,7 +112,7 @@ Para garantir a disponibilidade e performance, a aplicação foi distribuída em
 -  **📖 Frontend (Deploy):** A documentação visual dos componentes, padrões de UI e instruções de uso do frontend está disponível nos links abaixo.
     - **[Ver o deploy do frontend (Vercel)](nola-god-level-alpha.vercel.app)**
 - **📖 backend (Deploy):**   Antes de abrir os serviços ative o backend primeiro so assim para o resto funcionar:
-    - **[Ver o deploy do backend (Render)](https://nola-god-level.onrender.com/)**
+    - **[Ver o deploy do backend (Render)](https://nola-god-level.onrender.com/api/health)**
 
 
 
