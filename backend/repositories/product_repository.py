@@ -18,7 +18,7 @@ class ProductRepository(BaseRepository):
         self, 
         start_date: date, 
         end_date: date, 
-        # REMOVEMOS limit e skip daqui
+        limit: int,
         store_ids: Optional[List[int]], 
         channel_ids: Optional[List[int]]
     ):
@@ -46,7 +46,7 @@ class ProductRepository(BaseRepository):
         return (
             query.group_by(Product.id, Product.name, Category.name)
             .order_by(desc("revenue"))
-            # REMOVEMOS .offset() E .limit() DAQUI
+            .limit(limit)
             .all()
         )
 

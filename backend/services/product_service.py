@@ -1,12 +1,13 @@
-# product_service.py (Corrigido com 'skip')
+# product_service.py (Corrigido)
 
 from datetime import date
 from typing import List, Optional
 from repositories.product_repository import ProductRepository
 import schemas.product as schemas
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session # Não é mais usado no __init__
 
 class ProductService:
+    # MUDANÇA 1: Recebe o repositório, não a sessão 'db'
     def __init__(self, repository: ProductRepository):
         self.repository = repository
 
@@ -15,14 +16,14 @@ class ProductService:
         start_date: date, 
         end_date: date, 
         limit: int,
-        skip: int, # <--- 1. CORREÇÃO AQUI
+        skip: int, # <--- NOVO PARÂMETRO
         store_ids: Optional[List[int]], 
         channel_ids: Optional[List[int]]
     ) -> List[schemas.ProductRankingItem]:
         
         # 1. Chama o repositório (que faz o SQL)
         ranking_data = self.repository.get_ranking(
-            start_date, end_date, limit, skip, store_ids, channel_ids # <--- 2. CORREÇÃO AQUI
+            start_date, end_date, limit, skip, store_ids, channel_ids # <--- skip ADICIONADO AQUI
         )
         
         return [schemas.ProductRankingItem.model_validate(item) for item in ranking_data]
