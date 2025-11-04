@@ -1,0 +1,32 @@
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.kpi-card {
+  background-color: #374151; /* --gray-700 do PDF */
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #4b5563; /* Um pouco mais claro */
+  text-align: left;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.kpi-card-title {
+  font-size: 0.875rem; /* 14px */
+  color: #D1D5DB; /* --gray-300 */
+  margin: 0;
+}
+
+.kpi-card-value {
+  font-size: 1.75rem; /* Reduzido de 2rem para caber melhor */
+  font-weight: 700;
+  color: #F9FAFB; /* --gray-50 */
+  margin: 0.5rem 0;
+  
+  /* --- Correções --- */
+  word-wrap: break-word; /* Permite que o texto quebre a linha */
+  line-height: 1.2;      /* Ajusta a altura da linha caso quebre */
+}

@@ -21,21 +21,18 @@ def get_product_service(db: Session = Depends(get_db)):
 def get_products_ranking(
     start_date: date,
     end_date: date,
-    limit: int = 10,
-    skip: int = 0, # <--- NOVO PARÂMETRO (default 0)
+    # REMOVEMOS limit e skip daqui
     store_ids: Optional[List[int]] = Query(None), 
     channel_ids: Optional[List[int]] = Query(None),
     service: ProductService = Depends(get_product_service)
 ):
     """
-    Retorna o ranking de produtos mais vendidos (Top N) por faturamento,
-    com suporte a paginação (skip, limit).
+    Retorna o ranking de TODOS os produtos mais vendidos por faturamento.
     """
     return service.get_products_ranking(
         start_date=start_date,
         end_date=end_date,
-        limit=limit,
-        skip=skip, # <--- skip ADICIONADO AQUI
+        # REMOVEMOS limit e skip daqui
         store_ids=store_ids,
         channel_ids=channel_ids
     )
@@ -44,7 +41,7 @@ def get_products_ranking(
 def get_top_customizations(
     start_date: date,
     end_date: date,
-    limit: int = 10,
+    limit: int = 10, # Mantemos o limit aqui, pois 10 está bom
     store_ids: Optional[List[int]] = Query(None), 
     channel_ids: Optional[List[int]] = Query(None),
     service: ProductService = Depends(get_product_service)

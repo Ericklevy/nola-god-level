@@ -18,8 +18,7 @@ class ProductRepository(BaseRepository):
         self, 
         start_date: date, 
         end_date: date, 
-        limit: int,
-        skip: int, # <--- NOVO PARÂMETRO
+        # REMOVEMOS limit e skip daqui
         store_ids: Optional[List[int]], 
         channel_ids: Optional[List[int]]
     ):
@@ -47,8 +46,7 @@ class ProductRepository(BaseRepository):
         return (
             query.group_by(Product.id, Product.name, Category.name)
             .order_by(desc("revenue"))
-            .offset(skip) # <--- NOVA LINHA (para pular)
-            .limit(limit) # <--- .limit() (para limitar)
+            # REMOVEMOS .offset() E .limit() DAQUI
             .all()
         )
 
@@ -60,7 +58,6 @@ class ProductRepository(BaseRepository):
         store_ids: Optional[List[int]], 
         channel_ids: Optional[List[int]]
     ):
-        # (Esta função não precisa de paginação, então a mantemos igual)
         query = (
             self.db.query(
                 Item.id.label("item_id"),
